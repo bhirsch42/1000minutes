@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import App from './App'
 
+require('src/styles.scss')
+
 const colorDefaultBlockPrimary = '#e5e5e5';
 const colorDefaultBlockBG = 'white';
 const colors = [
@@ -29,11 +31,19 @@ function isBlockNow(i) {
 function updateNowBlock() {
   var newBlocks = [].concat(data.blocks)
   var time = moment().startOf('day');
+  var nowIndex;
   for (var i = 0; i < newBlocks.length; i++) {
     newBlocks[i].isNow = isBlockNow(i)
+    if (newBlocks[i].isNow)
+      nowIndex = i;
     time.add(10, 'minutes');
   }
   data.blocks = newBlocks;
+  let then = moment().startOf('day').add((nowIndex+1)*10, 'minutes');
+  let now = moment();
+  console.log(then-now);
+  setTimeout(then - now, updateNowBlock);
+
 }
 
 function initBlocks() {
@@ -46,7 +56,6 @@ function initBlocks() {
       time: time.format('h:mm'),
       time2: time.format('a'),
     };
-    console.log(newBlocks[i])
     time.add(10, 'minutes');
   }
   data.blocks = newBlocks;
@@ -107,7 +116,6 @@ function manipulateSelection() {
 
 initBlocks()
 updateNowBlock()
-console.log(data.blocks)
 var dayGrid = new Vue({
   el: '#day-grid',
   data: data,

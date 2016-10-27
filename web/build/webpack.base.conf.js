@@ -2,6 +2,8 @@ var path = require('path')
 var config = require('../config')
 var utils = require('./utils')
 var projectRoot = path.resolve(__dirname, '../')
+var autoprefixer = require('autoprefixer')
+var ExtractTextPlugin = require("extract-text-webpack-plugin")
 
 var env = process.env.NODE_ENV
 // check env & config/index.js to decide weither to enable CSS Sourcemaps for the
@@ -9,7 +11,6 @@ var env = process.env.NODE_ENV
 var cssSourceMapDev = (env === 'development' && config.dev.cssSourceMap)
 var cssSourceMapProd = (env === 'production' && config.build.productionSourceMap)
 var useCssSourceMap = cssSourceMapDev || cssSourceMapProd
-
 module.exports = {
   entry: {
     app: './src/main.js'
@@ -34,6 +35,10 @@ module.exports = {
   },
   module: {
     loaders: [
+      {
+        test: /\.(scss)$/,
+        loader: "sass-loader!postcss-loader"
+      },
       {
         test: /\.vue$/,
         loader: 'vue'
@@ -66,10 +71,16 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+    new ExtractTextPlugin("[name].css")
+  ],
+  postcss: function() {
+    return [autoprefixer]
+  },
   vue: {
     loaders: utils.cssLoaders({ sourceMap: useCssSourceMap }),
     postcss: [
-      require('autoprefixer')({
+      autoprefixer({
         browsers: ['last 2 versions']
       })
     ]
