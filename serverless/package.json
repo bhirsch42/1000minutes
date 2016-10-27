@@ -1,0 +1,21 @@
+{
+  "name": "aws-angular",
+  "version": "1.0.0",
+  "description": "",
+  "main": "config/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Manoj Fernando <manojf@99x.lk>",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.6.1",
+    "bluebird": "^3.4.6",
+    "dotenv": "2.0.0",
+    "serverless-plugin-write-env-vars": "1.0.1"
+  },
+  "devDependencies": {
+    "serverless-offline": "git+https://github.com/dherault/serverless-offline.git",
+    "serverless-dynamodb-local": "0.2.17"
+  }
+}
