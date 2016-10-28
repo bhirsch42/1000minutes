@@ -4,13 +4,119 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>web</title>
+    <style>
+      body {
+        font-family: "Open Sans";
+      }
+      #loading-cover {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: white;
+        z-index: 3000;
+        margin-top: -50px;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+            -ms-flex-pack: center;
+                justify-content: center;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
+
+        -webkit-transition: opacity 1s ease;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+      #loading-cover.show {
+        opacity: 1;
+        transition: opacity 1s ease;
+        -webkit-transition: opacity 1s ease;
+      }
+      #loading-icon {
+        width: 50px;
+        height: 50px;
+        border: 1px solid black;
+        margin: 20px;
+      }
+      @-webkit-keyframes pulse {
+        0% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+        10% {-webkit-transform: rotate(10deg);transform: rotate(10deg);}
+        50% {-webkit-transform: rotate(10deg);transform: rotate(10deg);}
+        60% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+        100% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+      }
+      @keyframes pulse {
+        0% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+        10% {-webkit-transform: rotate(10deg);transform: rotate(10deg);}
+        50% {-webkit-transform: rotate(10deg);transform: rotate(10deg);}
+        60% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+        100% {-webkit-transform: rotate(-10deg);transform: rotate(-10deg);}
+      }
+      .pulse {
+        -webkit-animation-duration: 2s;
+                animation-duration: 2s;
+        -webkit-animation-iteration-count: infinite;
+                animation-iteration-count: infinite;
+        -webkit-transition-timing-function: linear;
+                transition-timing-function: linear;
+        -webkit-animation-name: pulse;
+                animation-name: pulse;
+      }
+    </style>
   </head>
   <body>
-    <div id="topbar"></div>
-    <div id="day-grid">
+    <div id="loading-cover" class="show">
+      <h1>1000</h1>
+      <div id="loading-icon" class="pulse"></div>
+      <h1>minutes</h1>
+    </div>
+    <div id="topbar">
+      <div id="topbar-buttons">
+        <div id="back-button" class="topbar-item">Back</div>
+        <div id="forward-button" class="topbar-item">Forward</div>
+        <div id="activities-button" class="topbar-item">Activities</div>
+      </div>
+      <hr>
+      <div id="activity-select-bar">
+        <div class="activity-selector-wrapper" v-for="activity in activities">
+          <div class="activity-selector"
+               v-bind:style="activity.style"
+               v-bind:class="{selected: activity.selected}"
+               v-on:click="select(activity)">
+            {{ activity.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- EDIT ACTIVITIES MODAL
+    <div id="activities" class="center">
+      <div id="activities-mask" class="center">
+        <div id="activities-content">
+          <h1>Activities</h1>
+          <div id="activities-list">
+            <div class="activity-item-wrapper"
+                 v-for="activity in activities">
+              <div class="activity-item"
+                   v-bind:style="{backgroundColor: activity.color}">
+                {{ activity.name }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+ -->    <div id="day-grid">
       <div v-for="(block, index) in blocks"
            class="block"
-           v-bind:style="{backgroundColor: block.selectionColor}"
+           v-bind:style="block.bgStyle"
            v-on:touchstart="startSelection(index)"
            v-on:mousedown="startSelection(index)"
            v-on:touchmove="onTouchMove"
@@ -20,7 +126,7 @@
         <div v-bind:data-index="index"
              class="block-inner"
              v-bind:class="{pulse: block.isNow}"
-             v-bind:style="{backgroundColor: block.color}">
+             v-bind:style="block.blockStyle">
 
           <div pointer-events="none">{{ block.time }}</div>
           <div pointer-events="none">{{ block.time2 }}</div>

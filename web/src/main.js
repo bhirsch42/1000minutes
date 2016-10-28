@@ -15,10 +15,58 @@ const colors = [
 
 var moment = require('moment');
 
-
 var data = {
   moment: moment,
-  blocks: new Array(144)
+  blocks: new Array(144),
+  activities: [
+    {
+      name: 'No Plans',
+      style: {backgroundColor: colorDefaultBlockPrimary},
+      selected: true
+    },
+    {
+      name: 'Sleep',
+      style: {backgroundColor: '#333333', color: 'white'},
+      selected: false
+    },
+    {
+      name: 'Exercise',
+      style: {backgroundColor: colors[0]},
+      selected: false
+    },
+    {
+      name: 'Work',
+      style: {backgroundColor: colors[1]},
+      selected: false
+    },
+    {
+      name: 'Fun',
+      style: {backgroundColor: colors[2]},
+      selected: false
+    }
+  ]
+}
+
+window.data = data;
+
+var selectedActivity = data.activities[0];
+
+var saveLoadFields = ['saveTime', 'blocks', 'activities']
+
+function save() {
+  data.saveTime = moment()
+  for (var i = saveLoadFields.length - 1; i >= 0; i--) {
+    localStorage.setItem('1000minutes|' + saveLoadFields[i], JSON.stringify(data[saveLoadFields[i]]))
+  }
+}
+
+function load() {
+  for (var i = saveLoadFields.length - 1; i >= 0; i--) {
+    let loadedData = localStorage.getItem('1000minutes|' + saveLoadFields[i])
+    if (loadedData && loadedData.length && loadedData.length > 0) {
+      data[saveLoadFields[i]] = JSON.parse(loadedData);
+    }
+  }
 }
 
 function isBlockNow(i) {
@@ -41,9 +89,7 @@ function updateNowBlock() {
   data.blocks = newBlocks;
   let then = moment().startOf('day').add((nowIndex+1)*10, 'minutes');
   let now = moment();
-  console.log(then-now);
-  setTimeout(then - now, updateNowBlock);
-
+  setTimeout(updateNowBlock, then - now);
 }
 
 function initBlocks() {
@@ -51,8 +97,8 @@ function initBlocks() {
   var time = moment().startOf('day');
   for (var i = 0; i < newBlocks.length; i++) {
     newBlocks[i] = {
-      color: colorDefaultBlockPrimary,
-      selectionColor: colorDefaultBlockBG,
+      blockStyle: {backgroundColor: colorDefaultBlockPrimary},
+      bgStyle: {backgroundColor: colorDefaultBlockBG},
       time: time.format('h:mm'),
       time2: time.format('a'),
     };
@@ -84,9 +130,9 @@ function updateSelection() {
   var newBlocks = [].concat(data.blocks);
   for (var i = 0; i < newBlocks.length; i++) {
     if (low <= i && i <= high) {
-      newBlocks[i].selectionColor = colors[2];
+      newBlocks[i].bgStyle = selectedActivity.style;
     } else {
-      newBlocks[i].selectionColor = colorDefaultBlockBG;
+      newBlocks[i].bgStyle = {backgroundColor: colorDefaultBlockBG};
     }
   }
   data.blocks = newBlocks;
@@ -104,18 +150,20 @@ function manipulateSelection() {
   }
   var newBlocks = [].concat(data.blocks);
   for (var i = 0; i < newBlocks.length; i++) {
-    newBlocks[i].selectionColor = colorDefaultBlockBG;
+    newBlocks[i].bgStyle = {backgroundColor: colorDefaultBlockBG};
     if (low <= i && i <= high) {
-      newBlocks[i].color = colors[2];
+      newBlocks[i].blockStyle = selectedActivity.style;
     } else {
 
     }
   }
   data.blocks = newBlocks;
+  save()
 }
 
 initBlocks()
 updateNowBlock()
+load()
 var dayGrid = new Vue({
   el: '#day-grid',
   data: data,
@@ -162,3 +210,25 @@ var dayGrid = new Vue({
   }
 })
 
+var activitySelectBar = new Vue({
+  el: '#activity-select-bar',
+  data: {activities: data.activities},
+  methods: {
+    select(activity) {
+      selectedActivity.selected = false;
+      activity.selected = true;
+      selectedActivity = activity;
+      let newActivities = [].concat(data.activities);
+      data.activities = newActivities;
+    }
+  }
+});
+
+
+setTimeout(() => {
+  var loadingCover = document.getElementById('loading-cover');
+  loadingCover.className = '';
+  setTimeout(() => {
+    document.getElementById('loading-cover').remove()
+  }, 1000)
+}, 0)

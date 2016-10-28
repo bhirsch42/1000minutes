@@ -1,7 +1,9 @@
+$gray: #444444;
+
 body {
   display: flex;
   justify-content: center;
-  margin-top: 60px;
+  margin-top: 120px;
 }
 @keyframes pulse {
   0% {transform: rotate(-10deg);}
@@ -15,8 +17,8 @@ body {
   flex-wrap: wrap;
   width: 800px;
   height: 800px;
-  max-width: 95vh;
-  max-height: 95vh;
+  max-width: 80vh;
+  max-height: 80vh;
   @media (max-height: 600px) {
       max-width: none;
       max-height: none;
@@ -56,7 +58,7 @@ body {
   width: 80%;
   height: 80%;
   font-size: 10px;
-  color: #444444;
+  color: $gray;
 }
 .pulse {
   animation-duration: 2s;
@@ -65,13 +67,103 @@ body {
   animation-name: pulse;
 }
 
+
 #topbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 50px;
-  box-shadow: 0 0 10px #444444;
+  padding: 10px;
+  box-shadow: 0 0 10px $gray;
   background-color: white;
+  z-index: 1000;
+}
+
+#topbar-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.topbar-item {
+  position: relative;
+  background-color: #EEEEEE;
+  padding: 5px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-radius: 999px;
+}
+
+#activity-select-bar {
+  display: flex;
+  overflow-x: scroll;
+  margin-right: -10px;
+  margin-left: -10px;
+  user-select: none;
+  &::-webkit-scrollbar {
+      display: none;
+  }
+  &::before, &::after {
+    content: '';
+    display: block;
+    min-width: 20px;
+  }
+  &::after {
+    min-width: 40px;
+  }
+  .activity-selector {
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin: 5px;
+    border-radius: 999px;
+    white-space: nowrap;
+    &.selected {
+      box-shadow: 0 0 0px 5px lighten($gray, 20%);
+    }
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#activities {
   z-index: 999;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin-top: 50px;
+}
+
+#activities-mask {
+  background-color: rgba(0,0,0, .5);
+  width: 100%;
+  height: 100%;
+}
+
+#activities-content {
+  background-color: white;
+  padding: 15px;
+  h1 {
+    margin: 0;
+    text-align: center;
+  }
+}
+
+#activities-list {
+  display: flex;
+  flex-wrap: wrap;
+  .activity-item-wrapper {
+    width: 45%;
+    margin: 2.5%;
+  }
+  .activity-item {
+    padding: 10px;
+  }
 }
