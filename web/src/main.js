@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App'
 
 require('src/styles.scss')
+var _ = require('lodash');
 
 const colorDefaultBlockPrimary = '#e5e5e5';
 const colorDefaultBlockBG = 'white';
@@ -50,13 +51,17 @@ var data = {
 window.data = data;
 
 var selectedActivity = data.activities[0];
+var undoStack = [];
+var redoStack = [];
 
 var saveLoadFields = ['saveTime', 'blocks', 'activities']
 
 function save() {
   data.saveTime = moment()
   for (var i = saveLoadFields.length - 1; i >= 0; i--) {
-    localStorage.setItem('1000minutes|' + saveLoadFields[i], JSON.stringify(data[saveLoadFields[i]]))
+    let saveData = data[saveLoadFields[i]]
+    saveData = JSON.stringify(saveData)
+    localStorage.setItem('1000minutes|' + saveLoadFields[i], saveData)
   }
 }
 
@@ -64,7 +69,14 @@ function load() {
   for (var i = saveLoadFields.length - 1; i >= 0; i--) {
     let loadedData = localStorage.getItem('1000minutes|' + saveLoadFields[i])
     if (loadedData && loadedData.length && loadedData.length > 0) {
-      data[saveLoadFields[i]] = JSON.parse(loadedData);
+      loadedData = JSON.parse(loadedData)
+      data[saveLoadFields[i]] = loadedData;
+    }
+  }
+  for (var i = data.activities.length - 1; i >= 0; i--) {
+    if (data.activities[i].selected) {
+      selectedActivity = data.activities[i];
+      break;
     }
   }
 }
@@ -140,7 +152,7 @@ function updateSelection() {
 }
 
 function manipulateSelection() {
- var low, high;
+  var low, high;
   if (selectStart < selectEnd) {
     low = selectStart;
     high = selectEnd;
@@ -148,22 +160,28 @@ function manipulateSelection() {
     low = selectEnd;
     high = selectStart;
   }
-  var newBlocks = [].concat(data.blocks);
-  for (var i = 0; i < newBlocks.length; i++) {
-    newBlocks[i].bgStyle = {backgroundColor: colorDefaultBlockBG};
+  // Reset selection background colors to white
+  for (var i = 0; i < data.blocks.length; i++) {
+    data.blocks[i].bgStyle = {backgroundColor: colorDefaultBlockBG};
+  }
+  // Add to undo stack
+  let undoBlocks = _.cloneDeep(data.blocks);
+  undoStack.push(undoBlocks);
+  redoStack = [];
+  // Change the selected blocks
+  for (var i = 0; i < data.blocks.length; i++) {
     if (low <= i && i <= high) {
-      newBlocks[i].blockStyle = selectedActivity.style;
+      data.blocks[i].blockStyle = selectedActivity.style;
     } else {
 
     }
   }
-  data.blocks = newBlocks;
-  save()
+  data.blocks = data.blocks;
 }
 
 initBlocks()
-updateNowBlock()
 load()
+updateNowBlock()
 var dayGrid = new Vue({
   el: '#day-grid',
   data: data,
@@ -186,6 +204,7 @@ var dayGrid = new Vue({
       window.ontouchmove = null;
       updateSelection()
       manipulateSelection()
+      save()
     },
     onTouchMove(e) {
       if (!selecting) return;
@@ -206,6 +225,7 @@ var dayGrid = new Vue({
       window.ontouchmove = null;
       updateSelection()
       manipulateSelection()
+      save()
     }
   }
 })
@@ -224,6 +244,27 @@ var activitySelectBar = new Vue({
   }
 });
 
+var topbarButtons = new Vue({
+  el: '#topbar-buttons',
+  methods: {
+    undo() {
+      if (undoStack.length == 0)
+        return;
+      let blocks = undoStack.pop();
+      redoStack.push(_.cloneDeep(data.blocks));
+      data.blocks = blocks;
+      save()
+    },
+    redo() {
+      if (redoStack.length == 0)
+        return;
+      let blocks = redoStack.pop();
+      undoStack.push(_.cloneDeep(data.blocks));
+      data.blocks = blocks;
+      save()
+    }
+  }
+})
 
 setTimeout(() => {
   var loadingCover = document.getElementById('loading-cover');

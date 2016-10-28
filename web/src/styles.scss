@@ -83,6 +83,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  user-select: none;
 }
 
 .topbar-item {
